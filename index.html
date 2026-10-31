@@ -34,7 +34,6 @@
   <script defer src="assets/js/latent.js"></script>
   <script defer src="assets/js/viz.js"></script>
   <script defer src="assets/js/main.js"></script>
-  <script defer src="assets/js/papers.js"></script>
 
   <script type="application/ld+json">
   {
@@ -444,79 +443,6 @@
           </article>
         </div>
 
-        <div class="papers reveal" id="papers">
-          <div class="papers__head">
-            <div>
-              <h3 class="papers__title">Inside the papers</h3>
-              <p class="papers__sub">Figures and results, straight from the publications.</p>
-            </div>
-            <div class="tabs" role="tablist" aria-label="Choose a paper">
-              <button class="tab" type="button" role="tab" id="tab-redact" aria-controls="panel-redact" aria-selected="true">REDACT <span>EMNLP 2026</span></button>
-              <button class="tab" type="button" role="tab" id="tab-wcnc" aria-controls="panel-wcnc" aria-selected="false" tabindex="-1">Change-point detection <span>IEEE WCNC 2026</span></button>
-            </div>
-          </div>
-
-          <div class="panel" role="tabpanel" id="panel-redact" aria-labelledby="tab-redact">
-            <div class="figs">
-              <figure class="fig fig--tall">
-                <button class="fig__img" type="button" data-zoom="assets/img/papers/redact-record-anatomy.webp" aria-label="Enlarge: how one benchmark record is built">
-                  <img src="assets/img/papers/redact-record-anatomy.webp" alt="Diagram of the six-stage REDACT record pipeline (sample, generate, align, verify, tag, audit), showing one e-commerce JSON record with its PII spans tagged by sensitivity tier" width="1400" height="1645" loading="lazy" decoding="async">
-                </button>
-                <figcaption><span class="fig__no">Pipeline</span><b>How one record is built.</b> A 9-axis sampling plan, one LLM generation call, deterministic span alignment, GPT-4o-mini verification, sensitivity-tier and disclosure-form tags, then quality-gate audits before a record is admitted.</figcaption>
-              </figure>
-              <div class="figs__col">
-                <figure class="fig">
-                  <button class="fig__img" type="button" data-zoom="assets/img/papers/redact-recall-strata.webp" aria-label="Enlarge: recall by sensitivity tier and disclosure form">
-                    <img src="assets/img/papers/redact-recall-strata.webp" alt="Grouped bar charts of recall for Presidio, GLiNER, Privacy Filter, GPT-4.1 and Claude Sonnet 4.6, split by sensitivity tier and by disclosure form" width="2000" height="605" loading="lazy" decoding="async">
-                  </button>
-                  <figcaption><span class="fig__no">Recall</span><b>Where detectors miss.</b> Presidio's recall collapses on high-sensitivity and partially disclosed PII. Frontier LLMs lead, but obfuscated values still trip them up.</figcaption>
-                </figure>
-                <figure class="fig">
-                  <button class="fig__img" type="button" data-zoom="assets/img/papers/redact-special-categories.webp" aria-label="Enlarge: F1 on special-category data">
-                    <img src="assets/img/papers/redact-special-categories.webp" alt="Heatmap of partial-overlap F1 for special-category entity types such as religion, medical information and political party, across five detectors" width="1600" height="731" loading="lazy" decoding="async">
-                  </button>
-                  <figcaption><span class="fig__no">Special categories</span><b>Sensitive data is the blind spot.</b> Presidio and Privacy Filter score near zero on religion, health, political views and similar categories; only the LLMs catch most of them. <button class="fig__more" type="button" data-zoom="assets/img/papers/redact-per-type.webp">See all entity types →</button></figcaption>
-                </figure>
-              </div>
-              <figure class="fig fig--wide">
-                <button class="fig__img" type="button" data-zoom="assets/img/papers/redact-per-language.webp" aria-label="Enlarge: F1 across 25 languages">
-                  <img src="assets/img/papers/redact-per-language.webp" alt="Line chart of partial-overlap F1 across 25 languages for five detectors; Claude and GPT-4.1 sit well above Privacy Filter, GLiNER and Presidio in every language" width="2200" height="1039" loading="lazy" decoding="async">
-                </button>
-                <figcaption><span class="fig__no">Languages</span><b>25 languages, one consistent gap.</b> LLMs lead the specialised detectors in every language tested, from Arabic and Hebrew to Hindi, Thai and Danish.</figcaption>
-              </figure>
-            </div>
-            <div class="links">
-              <a class="link" href="https://arxiv.org/abs/2606.19881" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-paper"/></svg>Read the paper</a>
-              <a class="link" href="https://huggingface.co/datasets/guneeshv/REDACT-PII-Benchmark" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-data"/></svg>Dataset</a>
-            </div>
-          </div>
-
-          <div class="panel" role="tabpanel" id="panel-wcnc" aria-labelledby="tab-wcnc" hidden>
-            <ol class="method">
-              <li><span class="method__no">01</span><b>Project</b><p>An inner product with a dual-code vector <i>h</i> collapses each noisy codeword into one Bernoulli bit, <i>z<sub>i</sub></i> = <i>y<sub>i</sub>h<sup>T</sup></i>.</p></li>
-              <li><span class="method__no">02</span><b>Coarse MLE + confidence window</b><p>A Bernoulli maximum-likelihood scan gives a coarse change point; Hinkley's result gives a window that contains the true one with probability ≥ α.</p></li>
-              <li><span class="method__no">03</span><b>Neural refinement</b><p>A multi-scale 1D-CNN slides over the raw codewords inside that window and votes on the exact change point.</p></li>
-            </ol>
-            <div class="chart-head">
-              <div class="seg" role="tablist" aria-label="Choose a result">
-                <button type="button" role="tab" aria-selected="true" data-view="noise">Detection vs noise</button>
-                <button type="button" role="tab" aria-selected="false" tabindex="-1" data-view="pipeline">Two-stage pipeline</button>
-                <button type="button" role="tab" aria-selected="false" tabindex="-1" data-view="scaling">Longer sequences</button>
-              </div>
-              <button class="link" type="button" data-table-toggle aria-expanded="false">View as table</button>
-            </div>
-            <p class="chart-note" data-chart-note></p>
-            <ul class="legend" data-legend></ul>
-            <div class="charts" data-charts></div>
-            <div class="chart-tables" data-chart-tables hidden></div>
-            <p class="chart-src">Data from Fig. 3 of the paper: BCH codes, 10<sup>4</sup> Monte-Carlo trials, α = 0.95. Hover a chart, or focus it and use ← →, to read values.</p>
-            <div class="links">
-              <a class="link" href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=8d4WIgEAAAAJ&amp;citation_for_view=8d4WIgEAAAAJ:9yKSN-GCB0IC" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-scholar"/></svg>Paper on Scholar</a>
-              <a class="link" href="https://github.com/guneeshvats/Offline-Changepoint-Detection-in-Channel-Codes" target="_blank" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>Simulation code</a>
-            </div>
-          </div>
-        </div>
-
         <div class="pubs">
           <div class="pubs__head reveal">
             <h3 class="pubs__title">Publications &amp; ongoing work</h3>
@@ -540,7 +466,6 @@
                 <a href="https://arxiv.org/abs/2606.19881" target="_blank" rel="noopener">arXiv</a>
                 <a href="https://huggingface.co/datasets/guneeshv/REDACT-PII-Benchmark" target="_blank" rel="noopener">Data</a>
                 <a href="https://github.com/guneeshvats/REDACT-PII-Benchmark" target="_blank" rel="noopener">Code</a>
-                <a href="#papers" data-open-paper="redact">Figures</a>
               </div>
             </li>
             <li class="pub reveal" data-tags="nlp">
@@ -573,7 +498,6 @@
               <div class="pub__links">
                 <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=8d4WIgEAAAAJ&amp;citation_for_view=8d4WIgEAAAAJ:9yKSN-GCB0IC" target="_blank" rel="noopener">Scholar</a>
                 <a href="https://github.com/guneeshvats/Offline-Changepoint-Detection-in-Channel-Codes" target="_blank" rel="noopener">Code</a>
-                <a href="#papers" data-open-paper="wcnc">Figures</a>
               </div>
             </li>
             <li class="pub reveal" data-tags="signal">
@@ -862,12 +786,6 @@
       <ul class="palette__list" id="palette-list" role="listbox" data-palette-list></ul>
       <div class="palette__foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> select</span></div>
     </div>
-  </dialog>
-
-  <!-- Figure lightbox -->
-  <dialog class="lightbox" id="lightbox" aria-label="Figure viewer">
-    <button class="lightbox__close" type="button" aria-label="Close figure" data-lightbox-close>✕</button>
-    <img alt="" data-lightbox-img>
   </dialog>
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>

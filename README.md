@@ -14,9 +14,7 @@ assets/css/style.css       all styling; colours and fonts are CSS variables at t
 assets/js/latent.js        hero animation: the latent-space / k-NN query canvas
 assets/js/viz.js           REDACT redaction demo, ITSM agent trace, change-point detector
 assets/js/main.js          nav, scroll effects, token streaming, ⌘K palette, loss HUD
-assets/js/papers.js        "Inside the papers": paper tabs, figure zoom, WCNC charts
 assets/img/                photo, favicon, social preview image (og-image.jpg)
-assets/img/papers/         paper figures shown in "Inside the papers" (WebP)
 assets/docs/               résumé PDFs
 .github/workflows/         auto-deploy to GitHub Pages
 ```
@@ -67,8 +65,6 @@ or `gh workflow run deploy.yml`.
 | New paper | `index.html`, add an `<li class="pub">` in **Publications**; `data-tags` = `nlp`, `signal` or `speech` |
 | New project card | `index.html`, copy an `<a class="proj">` block in **Projects** |
 | Photo | replace `assets/img/guneesh-vats.jpg` (4:5 portrait); nudge the face box via `.bbox` in `style.css` |
-| Paper figure | add a WebP to `assets/img/papers/`, then copy a `<figure class="fig">` block in `index.html` |
-| WCNC chart data | `VIEWS` in `assets/js/papers.js` |
 | Hero phrases | `PHRASES` in `assets/js/main.js` |
 | Hero clusters & labels | `CLUSTERS` in `assets/js/latent.js` |
 | Colours / fonts | variables at the top of `assets/css/style.css` |
