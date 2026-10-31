@@ -37,6 +37,34 @@
   }
   $$('[data-copy]').forEach(b => b.addEventListener('click', () => copy(b.dataset.copy)));
 
+  /* ---------- Theme (dark default, remembered per visitor) ---------- */
+  const themeBtn = $('[data-theme-toggle]');
+  const themeMeta = $('meta[name="theme-color"]');
+  const currentTheme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeMeta.content = t === 'light' ? '#f6f7fb' : '#05060a';
+    themeBtn.setAttribute('aria-label', `Switch to ${t === 'light' ? 'dark' : 'light'} theme`);
+    try { localStorage.setItem('theme', t); } catch {}
+    document.dispatchEvent(new CustomEvent('themechange', { detail: t }));
+  }
+  // Circular reveal from the button where View Transitions exist; instant swap elsewhere.
+  function toggleTheme(origin) {
+    const next = currentTheme() === 'light' ? 'dark' : 'light';
+    if (!document.startViewTransition || reduceMotion) return applyTheme(next);
+    const r = (origin || themeBtn).getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    document.startViewTransition(() => applyTheme(next)).ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 650, easing: 'cubic-bezier(.2, .7, .2, 1)', pseudoElement: '::view-transition-new(root)' }
+      );
+    });
+  }
+  themeBtn.setAttribute('aria-label', `Switch to ${currentTheme() === 'light' ? 'dark' : 'light'} theme`);
+  themeBtn.addEventListener('click', () => toggleTheme(themeBtn));
+
   /* ---------- Mobile menu ---------- */
   const toggle = $('.nav__toggle');
   const menu = $('#mobile-menu');
@@ -274,6 +302,7 @@
     { group: 'Navigate', label: 'Toolkit', icon: 'i-arrow', hint: '05', run: go('skills') },
     { group: 'Navigate', label: 'Education & honors', icon: 'i-arrow', hint: '06', run: go('education') },
     { group: 'Navigate', label: 'Contact', icon: 'i-arrow', hint: '07', run: go('contact') },
+    { group: 'Actions', label: 'Switch light / dark theme', icon: 'i-sun', hint: 'theme', run: () => toggleTheme() },
     { group: 'Actions', label: 'Copy email address', icon: 'i-copy', hint: 'guneeshvats12@gmail.com', run: () => copy('guneeshvats12@gmail.com') },
     { group: 'Actions', label: 'Send an email', icon: 'i-mail', hint: 'mailto', run: () => (location.href = 'mailto:guneeshvats12@gmail.com') },
     { group: 'Actions', label: 'Open résumé (ML Engineering)', icon: 'i-down', hint: 'PDF', run: open('assets/docs/Guneesh_Vats_Resume_ML.pdf') },

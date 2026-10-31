@@ -16,17 +16,17 @@
 
   const K = 6;
   const CLUSTERS = [
-    { name: 'llms', color: [94, 231, 255], desk: [0.58, 0.30], mob: [0.22, 0.16],
+    { name: 'llms', color: [94, 231, 255], light: [8, 145, 178], desk: [0.58, 0.30], mob: [0.22, 0.16],
       vocab: ['lora', 'peft', 'prompt caching', 'fine-tuning', 'llm eval', 'rubric grading', 'transformers', 'deberta-v3', 'cosent', 'prompt versioning'] },
-    { name: 'retrieval', color: [167, 139, 250], desk: [0.83, 0.27], mob: [0.78, 0.12],
+    { name: 'retrieval', color: [167, 139, 250], light: [124, 58, 237], desk: [0.83, 0.27], mob: [0.78, 0.12],
       vocab: ['rag', 'milvus', 'cross-encoder', 're-ranking', 'sbert', 'pgvector', 'cosine sim', 'hard negatives', 'chromadb', 'metadata filters'] },
-    { name: 'vision', color: [244, 114, 182], desk: [0.90, 0.52], mob: [0.86, 0.38],
+    { name: 'vision', color: [244, 114, 182], light: [219, 39, 119], desk: [0.90, 0.52], mob: [0.86, 0.38],
       vocab: ['yolov11', 'vlm grading', 'ocr', 'textract', 'mAP50 0.975', 'handwriting', 'segmentation', 'document ai'] },
-    { name: 'speech', color: [251, 191, 36], desk: [0.80, 0.72], mob: [0.70, 0.88],
+    { name: 'speech', color: [251, 191, 36], light: [217, 119, 6], desk: [0.80, 0.72], mob: [0.70, 0.88],
       vocab: ['whisper', 'pyannote', 'diarization', 'nvidia riva', 'log-mel', 'asr', 'wer 21.4%', 'prosody', 'emotion'] },
-    { name: 'agents', color: [52, 211, 153], desk: [0.60, 0.70], mob: [0.22, 0.82],
+    { name: 'agents', color: [52, 211, 153], light: [5, 150, 105], desk: [0.60, 0.70], mob: [0.22, 0.82],
       vocab: ['react agents', 'tool calls', 'itsm', 'triage', 'routing', 'workflows', '75+ metrics', 'abstention'] },
-    { name: 'signals', color: [96, 165, 250], desk: [0.72, 0.49], mob: [0.42, 0.48],
+    { name: 'signals', color: [96, 165, 250], light: [37, 99, 235], desk: [0.72, 0.49], mob: [0.42, 0.48],
       vocab: ['change-point', 'cusum', 'mle', 'bch codes', 'viterbi', 'markov chain', '1d-cnn', 'hinkley'] },
   ];
 
@@ -37,15 +37,37 @@
   const q = { x: 0, y: 0, tx: 0, ty: 0, lastMove: -1e9 };
   const order = [];
 
+  // Per-theme drawing style: glowing points on dark, solid points with soft halos on light.
+  const LOOK = {
+    dark: { key: 'color', core: true, edge: [0.1, 0.22], name: [0.32, 0.85], idle: [0.55, 0.85], ink: 'rgba(233,236,243,.95)',
+      pill: 'rgba(6,8,13,.78)', fade: 'rgba(255,255,255,.05)', ball: 'rgba(233,236,243,.18)', cross: 'rgba(255,255,255,.9)', ripple: '94,231,255' },
+    light: { key: 'light', core: false, edge: [0.16, 0.32], name: [0.55, 0.95], idle: [0.6, 0.9], ink: 'rgba(11,16,32,.92)',
+      pill: 'rgba(255,255,255,.94)', fade: 'rgba(15,23,42,.06)', ball: 'rgba(15,23,42,.22)', cross: 'rgba(15,23,42,.85)', ripple: '8,145,178' },
+  };
+  let look = LOOK.dark;
+  const spriteCache = {};
+  function setLook() {
+    const t = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    look = LOOK[t];
+    sprites = spriteCache[t] || (spriteCache[t] = CLUSTERS.map(c => makeSprite(c[look.key], look.core)));
+  }
+  const hue = ci => CLUSTERS[ci][look.key];
+
   // Glow sprites, one per cluster colour, so we never use shadowBlur per frame.
-  function makeSprite([r, g, b]) {
+  function makeSprite([r, g, b], core) {
     const s = 64, c = document.createElement('canvas');
     c.width = c.height = s;
     const g2 = c.getContext('2d');
     const grd = g2.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-    grd.addColorStop(0, 'rgba(255,255,255,1)');
-    grd.addColorStop(0.1, `rgba(${r},${g},${b},1)`);
-    grd.addColorStop(0.32, `rgba(${r},${g},${b},.32)`);
+    if (core) {
+      grd.addColorStop(0, 'rgba(255,255,255,1)');
+      grd.addColorStop(0.1, `rgba(${r},${g},${b},1)`);
+      grd.addColorStop(0.32, `rgba(${r},${g},${b},.32)`);
+    } else {
+      grd.addColorStop(0, `rgba(${r},${g},${b},1)`);
+      grd.addColorStop(0.16, `rgba(${r},${g},${b},.95)`);
+      grd.addColorStop(0.36, `rgba(${r},${g},${b},.2)`);
+    }
     grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
     g2.fillStyle = grd;
     g2.fillRect(0, 0, s, s);
@@ -195,8 +217,8 @@
     // 1. Within-cluster graph edges.
     ctx.lineWidth = 1;
     for (let ci = 0; ci < CLUSTERS.length; ci++) {
-      const [r, g, b] = CLUSTERS[ci].color;
-      ctx.strokeStyle = `rgba(${r},${g},${b},${ci === nearestCluster ? 0.22 : 0.1})`;
+      const [r, g, b] = hue(ci);
+      ctx.strokeStyle = `rgba(${r},${g},${b},${look.edge[ci === nearestCluster ? 1 : 0]})`;
       ctx.beginPath();
       for (const [i, j] of edges) {
         if (points[i].c !== ci) continue;
@@ -211,8 +233,8 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     CLUSTERS.forEach((c, ci) => {
-      const [r, g, b] = c.color;
-      const a = ci === nearestCluster ? 0.85 : 0.32;
+      const [r, g, b] = hue(ci);
+      const a = look.name[ci === nearestCluster ? 1 : 0];
       ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
       ctx.fillText(c.name.toUpperCase(), centers[ci].x * W, Math.max(96, centers[ci].y * H - unit * 2.1));
     });
@@ -221,7 +243,7 @@
     const kd = points[top[K - 1]].d;
     ctx.save();
     ctx.setLineDash([3, 5]);
-    ctx.strokeStyle = 'rgba(233,236,243,.18)';
+    ctx.strokeStyle = look.ball;
     ctx.beginPath();
     ctx.arc(q.x, q.y, kd + 6, 0, Math.PI * 2);
     ctx.stroke();
@@ -230,9 +252,9 @@
     // 4. Query → neighbour lines.
     top.forEach((idx, rank) => {
       const p = points[idx];
-      const [r, g, b] = CLUSTERS[p.c].color;
+      const [r, g, b] = hue(p.c);
       const grd = ctx.createLinearGradient(q.x, q.y, p.x, p.y);
-      grd.addColorStop(0, 'rgba(255,255,255,.05)');
+      grd.addColorStop(0, look.fade);
       grd.addColorStop(1, `rgba(${r},${g},${b},${0.75 - rank * 0.09})`);
       ctx.strokeStyle = grd;
       ctx.lineWidth = rank === 0 ? 1.4 : 1;
@@ -247,7 +269,7 @@
       const p = points[i];
       const hot = topSet.has(i);
       const s = (hot ? 30 : 15) * p.size;
-      ctx.globalAlpha = hot ? 1 : p.c === nearestCluster ? 0.85 : 0.55;
+      ctx.globalAlpha = hot ? 1 : look.idle[p.c === nearestCluster ? 1 : 0];
       ctx.drawImage(sprites[p.c], p.x - s / 2, p.y - s / 2, s, s);
     }
     ctx.globalAlpha = 1;
@@ -259,7 +281,7 @@
     top.forEach((idx, rank) => {
       const p = points[idx];
       if (used.has(p.label)) return;
-      const [r, g, b] = CLUSTERS[p.c].color;
+      const [r, g, b] = hue(p.c);
       const text = `${p.label}  ${sim(p.d).toFixed(2)}`;
       const tw = ctx.measureText(text).width;
       // Try four spots around the point; skip the label if all of them collide.
@@ -272,13 +294,13 @@
       placed.push({ x: lx - 6, y: ly - 9, w: tw + 12 });
       used.add(p.label);
       ctx.globalAlpha = 1 - rank * 0.11;
-      ctx.fillStyle = 'rgba(6,8,13,.78)';
+      ctx.fillStyle = look.pill;
       roundRect(lx - 6, ly - 9, tw + 12, 18, 5);
       ctx.fill();
       ctx.strokeStyle = `rgba(${r},${g},${b},.45)`;
       ctx.lineWidth = 1;
       ctx.stroke();
-      ctx.fillStyle = 'rgba(233,236,243,.95)';
+      ctx.fillStyle = look.ink;
       ctx.fillText(p.label, lx, ly + 0.5);
       ctx.fillStyle = `rgba(${r},${g},${b},1)`;
       ctx.fillText(sim(p.d).toFixed(2), lx + ctx.measureText(p.label + '  ').width, ly + 0.5);
@@ -286,7 +308,7 @@
     ctx.globalAlpha = 1;
 
     // 7. The query itself.
-    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.strokeStyle = look.cross;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.arc(q.x, q.y, 5, 0, Math.PI * 2);
@@ -301,7 +323,7 @@
       const k = (now - ripple.start) / 900;
       if (k >= 1) ripple = null;
       else {
-        ctx.strokeStyle = `rgba(94,231,255,${0.6 * (1 - k)})`;
+        ctx.strokeStyle = `rgba(${look.ripple},${0.6 * (1 - k)})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(ripple.x, ripple.y, 10 + k * 220, 0, Math.PI * 2);
@@ -369,7 +391,8 @@
     resizeRaf = requestAnimationFrame(resize);
   });
 
-  sprites = CLUSTERS.map(c => makeSprite(c.color));
+  setLook();
+  document.addEventListener('themechange', () => { setLook(); if (!running) draw(performance.now()); });
   resize();
   setRunning();
   requestAnimationFrame(() => canvas.classList.add('ready'));

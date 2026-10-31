@@ -67,4 +67,4 @@ or `gh workflow run deploy.yml`.
 | Photo | replace `assets/img/guneesh-vats.jpg` (4:5 portrait); nudge the face box via `.bbox` in `style.css` |
 | Hero phrases | `PHRASES` in `assets/js/main.js` |
 | Hero clusters & labels | `CLUSTERS` in `assets/js/latent.js` |
-| Colours / fonts | variables at the top of `assets/css/style.css` |
+| Colours / fonts | token blocks at the top of `assets/css/style.css`: the first block is the dark theme, `[data-theme="light"]` is the light theme |
